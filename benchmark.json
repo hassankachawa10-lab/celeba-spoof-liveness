@@ -1,0 +1,58 @@
+{
+  "model_metadata": {
+    "model_name": "AENet (Auxiliary Information Embedding Network)",
+    "architecture": "ResNet-18 Multi-Task (Semantic + Geometric Heads)",
+    "framework": "PyTorch",
+    "checkpoint_file": "ckpt_iter.pth.tar",
+    "input_resolution": "3x224x224",
+    "normalization": "torchvision.transforms.ToTensor() ([0.0, 1.0], no mean/std subtraction)",
+    "crop_protocol": "CelebA-Spoof bounding box coordinate scale (w * real_w / 224, h * real_h / 224, 0 margin)",
+    "decision_threshold": 0.5,
+    "trained_accuracy_checkpoint": 96.66146441557561
+  },
+  "evaluation_summary": {
+    "dataset": "CelebA-Spoof Test Split (Local Verification Set)",
+    "total_evaluated_samples": 4,
+    "live_samples": 2,
+    "spoof_samples": 2,
+    "accuracy": 75.0,
+    "apcer": 50.0,
+    "bpcer": 0.0,
+    "acer": 25.0,
+    "eer": 0.0,
+    "auc": 1.0,
+    "tpr_at_fpr_1_0_pct": 100.0,
+    "tpr_at_fpr_0_5_pct": 100.0,
+    "tpr_at_fpr_0_1_pct": 100.0,
+    "latency": {
+      "device": "cpu",
+      "mean_ms_per_frame": 37.71,
+      "std_ms_per_frame": 4.66,
+      "fps": 26.5
+    }
+  },
+  "spoof_type_breakdown": {
+    "Live": {
+      "samples": 3,
+      "accuracy": 100.0,
+      "error_rate": 0.0
+    },
+    "Photo": {
+      "samples": 1,
+      "accuracy": 0.0,
+      "error_rate": 100.0
+    }
+  },
+  "illumination_breakdown": {
+    "Normal": {
+      "samples": 4,
+      "accuracy": 75.0,
+      "error_rate": 25.0
+    }
+  },
+  "full_dataset_protocol_reference": {
+    "full_dataset_size": "625,537 images from 10,177 subjects",
+    "full_dataset_attributes": 43,
+    "note": "Measured on CelebA-Spoof test split; real-world results vary with lighting, camera and display quality."
+  }
+}
