@@ -11,6 +11,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 WORKDIR /app
 
+# Pin NumPy 1.x before torch so pip never installs NumPy 2.x and then downgrades it in place
+RUN pip install --no-cache-dir numpy==1.26.4
+
 # Install CPU-only PyTorch first (separate layer for better caching)
 RUN pip install --no-cache-dir \
         torch==2.1.2+cpu \
