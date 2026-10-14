@@ -49,34 +49,39 @@ app.add_middleware(
 frontend_dist = os.path.join(PROJECT_DIR, "frontend", "dist")
 frontend_public = os.path.join(PROJECT_DIR, "frontend", "public")
 
-mediapipe_dir = os.path.join(frontend_dist, "mediapipe")
-if not os.path.exists(mediapipe_dir):
-    mediapipe_dir = os.path.join(frontend_public, "mediapipe")
+# On Railway we are API-only; Vercel serves the frontend.
+IS_RAILWAY = os.environ.get("RAILWAY_DEPLOYMENT") == "true"
 
-if os.path.exists(mediapipe_dir):
-    from fastapi.staticfiles import StaticFiles
-    app.mount("/mediapipe", StaticFiles(directory=mediapipe_dir), name="mediapipe")
+if not IS_RAILWAY:
+    mediapipe_dir = os.path.join(frontend_dist, "mediapipe")
+    if not os.path.exists(mediapipe_dir):
+        mediapipe_dir = os.path.join(frontend_public, "mediapipe")
 
-if os.path.exists(frontend_dist):
-    from fastapi.staticfiles import StaticFiles
-    from fastapi.responses import FileResponse
-    assets_dir = os.path.join(frontend_dist, "assets")
-    if os.path.exists(assets_dir):
-        app.mount("/assets", StaticFiles(directory=assets_dir), name="assets")
+    if os.path.exists(mediapipe_dir):
+        from fastapi.staticfiles import StaticFiles
+        app.mount("/mediapipe", StaticFiles(directory=mediapipe_dir), name="mediapipe")
 
-    @app.get("/")
-    async def serve_frontend_root():
-        return FileResponse(os.path.join(frontend_dist, "index.html"))
+    if os.path.exists(frontend_dist):
+        from fastapi.staticfiles import StaticFiles
+        from fastapi.responses import FileResponse
+        assets_dir = os.path.join(frontend_dist, "assets")
+        if os.path.exists(assets_dir):
+            app.mount("/assets", StaticFiles(directory=assets_dir), name="assets")
 
-    @app.get("/sample_{name}.jpg")
-    async def serve_sample(name: str):
-        p1 = os.path.join(frontend_dist, f"sample_{name}.jpg")
-        p2 = os.path.join(frontend_public, f"sample_{name}.jpg")
-        if os.path.exists(p1):
-            return FileResponse(p1)
-        if os.path.exists(p2):
-            return FileResponse(p2)
-        raise HTTPException(status_code=404, detail="Sample not found")
+        @app.get("/")
+        async def serve_frontend_root():
+            return FileResponse(os.path.join(frontend_dist, "index.html"))
+
+        @app.get("/sample_{name}.jpg")
+        async def serve_sample(name: str):
+            p1 = os.path.join(frontend_dist, f"sample_{name}.jpg")
+            p2 = os.path.join(frontend_public, f"sample_{name}.jpg")
+            if os.path.exists(p1):
+                return FileResponse(p1)
+            if os.path.exists(p2):
+                return FileResponse(p2)
+            raise HTTPException(status_code=404, detail="Sample not found")
+
 
 @app.get("/health", response_model=HealthResponse)
 async def health_check():

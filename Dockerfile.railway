@@ -1,0 +1,36 @@
+# ── Backend-only image for Railway deployment ─────────────────────────────────
+# (No frontend files — Vercel handles the frontend)
+FROM python:3.11-slim
+
+# System libs needed by opencv-headless & torch
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        libglib2.0-0 \
+        libgl1 \
+        libgomp1 \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Install CPU-only PyTorch first (separate layer for better caching)
+RUN pip install --no-cache-dir \
+        torch==2.1.2+cpu \
+        torchvision==0.16.2+cpu \
+        --index-url https://download.pytorch.org/whl/cpu
+
+# Install remaining deps
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy only backend + model files (NOT frontend/dist — Vercel handles that)
+COPY backend/           ./backend/
+COPY intra_dataset_code/ ./intra_dataset_code/
+COPY model/             ./model/
+COPY benchmark.json     ./benchmark.json
+
+# Disable FastAPI from trying to serve frontend static files on Railway
+# (frontend is served by Vercel; backend is API-only)
+ENV RAILWAY_DEPLOYMENT=true
+
+# Railway provides PORT dynamically
+EXPOSE 8000
+CMD ["sh", "-c", "python -m uvicorn backend.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
